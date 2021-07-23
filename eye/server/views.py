@@ -9,10 +9,10 @@ import dateutil.parser
 import json
 
 def save_event(body, session, scheduled):
-    category = body.get('category')
-    name = body.get('name')
-    data = body.get('data')
-    timestamp = dateutil.parser.parse(body.get('timestamp'))
+    category = body.get('category', None)
+    name = body.get('name', None)
+    data = body.get('data', None)
+    timestamp = dateutil.parser.parse(body.get('timestamp', None))
     valid = True
     invalid_reason = ''
     if timestamp >= scheduled:
@@ -55,7 +55,7 @@ def session(request, session_id=None):
 def upload(request):
     body = json.loads(request.body.decode('utf-8'))
     # TODO - add a check to ensure that the application sending this event is trusted before proceeding
-    session_id = body.get('session_id')
+    session_id = body.get('session_id', None)
     session = Session.objects.filter(identifier=session_id).first()
     if not session:
         session = Session(identifier=session_id)
