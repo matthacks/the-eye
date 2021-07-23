@@ -19,6 +19,7 @@ Clone the repository and then via terminal navigate to the main project folder a
 Once the installation is complete, you will need to complete the following:
 
 1. start local redis server with default settings
+2. run the following command in a pipenv shell: ./manage.py migrate
 2. run the following command in a pipenv shell: ./manage.py qcluster
 3. run the following command in another pipenv shell: ./manage.py runserver
 
