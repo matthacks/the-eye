@@ -8,9 +8,6 @@ from datetime import datetime
 import dateutil.parser
 import json
 
-def notify_error(task):
-    pass
-
 def save_event(body, session, scheduled):
     category = body.get('category')
     name = body.get('name')
@@ -21,7 +18,8 @@ def save_event(body, session, scheduled):
     if timestamp >= scheduled:
         valid = False
         invalid_reason = 'Timestamp ({}) is from a future date ({})'.format(timestamp, scheduled)
-    # TODO - add payload validators here
+    # TODO - add a payload validator here
+    # TODO - if invalid we could kick off a notification task
     event = Event(
         timestamp=timestamp,
         application=None,
@@ -39,19 +37,24 @@ def application(request):
     serialized_qset = serializers.serialize('json', qset)
     return HttpResponse(serialized_qset, content_type='application/json')
 
-def event(request):
+def event(request, session_id=None):
     qset = Event.objects.all()
+    if session_id:
+        qset = qset.filter(session__identifier=session_id)
     serialized_qset = serializers.serialize('json', qset)
     return HttpResponse(serialized_qset, content_type='application/json')
 
-def session(request):
+def session(request, session_id=None):
     qset = Session.objects.all()
+    if session_id:
+        qset = qset.filter(identifier=session_id)
     serialized_qset = serializers.serialize('json', qset)
     return HttpResponse(serialized_qset, content_type='application/json')
 
-@csrf_exempt
+@csrf_exempt # TODO - this decorator was added to be able to connect and quickly run POST requests without reconfiguring project
 def upload(request):
     body = json.loads(request.body.decode('utf-8'))
+    # TODO - add a check to ensure that the application sending this event is trusted before proceeding
     session_id = body.get('session_id')
     session = Session.objects.filter(identifier=session_id).first()
     if not session:
